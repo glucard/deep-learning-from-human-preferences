@@ -40,6 +40,11 @@ class RewardPredictorNetwork(nn.Module):
         )
         self.lstm = nn.LSTM(features_dim + 1, features_dim, num_layers=1, dropout=dropout) # + 1 for action
         self.lstm_relu = nn.ReLU()
+        self.output = nn.Sequential(
+            nn.Linear(features_dim, 1),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+        )
 
         self.optimizer = th.optim.SGD(self.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
@@ -48,21 +53,27 @@ class RewardPredictorNetwork(nn.Module):
         x = self.cnn(x)
         x = self.linear(x)
         x = th.concat([x, seq_action], dim=-1) # concat obs and action ?? <--|||||||||||||||-------------|||||||||||||||---------------|||||||||||||||---------
-        x = self.lstm_relu(x)
+        x, (hn, cn) = self.lstm(x)
+        x = self.lstm_relu(x)[-1]
+        x = self.output(x)
         return x
     
-    def train_rp(self, D):
+    def train_rp(self, D) -> float:
         self.optimizer.zero_grad()
-
+        run_loss = 0
+        # todo : val loss
         for d in D:
             (seq_obs_1, seq_a_1), (seq_obs_2, seq_a_2), m = d # m is a tensor:(m1, m2)
             y_1 = self.forward(seq_obs_1, seq_a_1)
             y_2 = self.forward(seq_obs_2, seq_a_2)
             y = th.stack(y_1, y_2)
             loss = F.softmax(y, dim=1).dot(m.T)
+            run_loss += loss.item()
             loss.backward()
 
         self.optimizer.step()
+        self.optimizer.zero_grad() # just to free memory
+        return run_loss / len(D)
 
 def debug():
     obs_shape = (3, 80, 80)
@@ -72,7 +83,7 @@ def debug():
     seq_action_sample = th.randint(0, 3, (seq_len, 1))
 
     reward_predictor_net = RewardPredictorNetwork(obs_shape)
-    reward_predictor_net(seq_obs_sample, seq_action_sample)
+    print(reward_predictor_net(seq_obs_sample, seq_action_sample).shape)
 
 if __name__ == "__main__":
     debug()
