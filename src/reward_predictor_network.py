@@ -13,7 +13,7 @@ class RewardPredictorNetwork(nn.Module):
         """
         super(RewardPredictorNetwork, self).__init__()
 
-        self.learning_rate = learning_rate
+        # self.learning_rate = learning_rate
         # self.weight_decay = weight_decay
         # self.dropout = dropout
 
@@ -31,7 +31,6 @@ class RewardPredictorNetwork(nn.Module):
         # Compute shape by doing one forward pass
         with th.no_grad():
             obs_sample = th.zeros((observation_shape), dtype=th.float32)
-            print(self.cnn(th.as_tensor(obs_sample[None])).shape)
             n_flatten = self.cnn(th.as_tensor(obs_sample[None])).shape[1]
 
         self.linear = nn.Sequential(
@@ -42,7 +41,7 @@ class RewardPredictorNetwork(nn.Module):
         self.lstm = nn.LSTM(features_dim + 1, features_dim, num_layers=1, dropout=dropout) # + 1 for action
         self.lstm_relu = nn.ReLU()
 
-        self.optimizer = th.optim.SGD(self.parameters(), weight_decay=weight_decay)
+        self.optimizer = th.optim.SGD(self.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     def forward(self, seq_observation: th.Tensor, seq_action: th.Tensor) -> th.Tensor:
         x = seq_observation
