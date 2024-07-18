@@ -35,7 +35,8 @@ class RewardPredictorNetwork(nn.Module):
             n_flatten = self.cnn(th.as_tensor(obs_sample[None])).shape[1]
 
         self.linear = nn.Sequential(
-            nn.Linear(n_flatten, features_dim, dropout=dropout),
+            nn.Linear(n_flatten, features_dim),
+            nn.Dropout(dropout),
             nn.ReLU(),
         )
         self.lstm = nn.LSTM(features_dim + 1, features_dim, num_layers=1, dropout=dropout) # + 1 for action
