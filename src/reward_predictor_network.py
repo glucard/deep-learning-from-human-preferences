@@ -43,7 +43,7 @@ class RewardPredictorNetwork(nn.Module):
 
         self.optimizer = th.optim.SGD(self.parameters(), weight_decay=weight_decay)
 
-    def forward(self, seq_observation: th.Tensor, seq_action: th.tensor) -> th.Tensor:
+    def forward(self, seq_observation: th.Tensor, seq_action: th.Tensor) -> th.Tensor:
         x = seq_observation
         x = self.cnn(x)
         x = self.linear(x)
