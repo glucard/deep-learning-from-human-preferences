@@ -1,0 +1,4 @@
+action to hot - done
+
+train to device - open
+optimize cnn and lstm batch train - open

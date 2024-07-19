@@ -3,7 +3,7 @@ from torch import nn
 import torch.nn.functional as F
 
 class RewardPredictorNetwork(nn.Module):
-    def __init__(self, observation_shape:tuple, features_dim:int=256, learning_rate:float=3e-4, weight_decay:float=.0, dropout:float=.0) -> None:
+    def __init__(self, observation_shape:tuple, n_action:int, device:str, features_dim:int=256, learning_rate:float=3e-4, weight_decay:float=.0, dropout:float=.0) -> None:
 
         """
         observation_shape:
@@ -11,6 +11,7 @@ class RewardPredictorNetwork(nn.Module):
         weight_decay: l2 regularization
         dropout: dropout
         """
+        self.device = device
         super(RewardPredictorNetwork, self).__init__()
 
         # self.learning_rate = learning_rate
@@ -38,7 +39,7 @@ class RewardPredictorNetwork(nn.Module):
             nn.Dropout(dropout),
             nn.ReLU(),
         )
-        self.lstm = nn.LSTM(features_dim + 1, features_dim, num_layers=1, dropout=dropout) # + 1 for action
+        self.lstm = nn.LSTM(features_dim + n_action, features_dim, num_layers=1, dropout=dropout) # + 1 for action
         self.lstm_relu = nn.ReLU()
         self.output = nn.Sequential(
             nn.Linear(features_dim, 1),
@@ -49,6 +50,8 @@ class RewardPredictorNetwork(nn.Module):
         self.optimizer = th.optim.SGD(self.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     def forward(self, seq_observation: th.Tensor, seq_action: th.Tensor) -> th.Tensor:
+        seq_observation = seq_observation.to(self.device)
+        seq_action = seq_action.to(self.device)
         x = seq_observation
         x = self.cnn(x)
         x = self.linear(x)
@@ -64,10 +67,17 @@ class RewardPredictorNetwork(nn.Module):
         # todo : val loss
         for d in D:
             (seq_obs_1, seq_a_1), (seq_obs_2, seq_a_2), m = d # m is a tensor:(m1, m2)
+            seq_obs_1 = seq_obs_1.to(self.device)
+            seq_a_1 = seq_a_1.to(self.device)
+            seq_obs_2 = seq_obs_2.to(self.device)
+            seq_a_2 = seq_a_2.to(self.device)
+            m = m.to(self.device)
             y_1 = self.forward(seq_obs_1, seq_a_1)
             y_2 = self.forward(seq_obs_2, seq_a_2)
-            y = th.stack(y_1, y_2)
-            loss = F.softmax(y, dim=1).dot(m.T)
+            y = th.stack([y_1, y_2])
+            # print(F.softmax(y, dim=0), F.softmax(y, dim=1).shape)
+            # print(m.unsqueeze(0), m.unsqueeze(0).shape)
+            loss = th.matmul(m.unsqueeze(0), F.softmax(y, dim=0))
             run_loss += loss.item()
             loss.backward()
 
