@@ -1,4 +1,6 @@
+import numpy as np
 import torch as th
+
 from sb3_contrib import RecurrentPPO
 from sb3_contrib.ppo_recurrent.policies import CnnLstmPolicy
 
