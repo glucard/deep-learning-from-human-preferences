@@ -62,24 +62,33 @@ class RewardPredictorNetwork(nn.Module):
         return x
     
     def train_rp(self, D) -> float:
+        self.optimizer = th.optim.SGD(self.parameters(), lr=self.learning_rate) #, weight_decay=self.weight_decay)
         self.optimizer.zero_grad()
         run_loss = 0
         # todo : val loss
+        
+        experiences = []
         for d in D:
-            (seq_obs_1, seq_a_1), (seq_obs_2, seq_a_2), m = d # m is a tensor:(m1, m2)
+            (seq_obs_1, seq_a_1), (seq_obs_2, seq_a_2), mu = d # m is a tensor:(m1, m2)
             seq_obs_1 = seq_obs_1.to(self.device)
             seq_a_1 = seq_a_1.to(self.device)
             seq_obs_2 = seq_obs_2.to(self.device)
             seq_a_2 = seq_a_2.to(self.device)
-            m = m.to(self.device)
+            mu = mu.to(self.device).unsqueeze(0)
+
             y_1 = self.forward(seq_obs_1, seq_a_1)
             y_2 = self.forward(seq_obs_2, seq_a_2)
-            y = th.stack([y_1, y_2])
-            # print(F.softmax(y, dim=0), F.softmax(y, dim=1).shape)
-            # print(m.unsqueeze(0), m.unsqueeze(0).shape)
-            loss = th.matmul(m.unsqueeze(0), F.softmax(y, dim=0))
-            run_loss += loss.item()
-            loss.backward()
+            y = th.stack([y_1, y_2], dim=1)
+            y = y.sum(dim=0)
+            # print(y)
+            
+            probs = F.softmax(y, dim=0)
+            log_probs = th.log(probs)
+            experiences.append(th.matmul(mu, log_probs))
+
+        loss = -th.stack(experiences).sum()
+        loss.backward()
+        run_loss += loss.item()
 
         self.optimizer.step()
         self.optimizer.zero_grad() # just to free memory
