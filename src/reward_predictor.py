@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 import cv2
+import tkinter as tk
+from .human_feedback_interface import interface_pick
 
 def save_video(frames, i):
     # Define the codec and create a VideoWriter object
@@ -28,7 +30,7 @@ class RewardPredictor:
 
         self.n_action = n_action
         self.n_predictors = n_predictors
-        self.predictors = [RewardPredictorNetwork(obs_shape, n_action, device, learning_rate=5e-3).to(device) for _ in range(n_predictors)]
+        self.predictors = [RewardPredictorNetwork(obs_shape, n_action, device).to(device) for _ in range(n_predictors)]
         self.D = []
         self.temp_experience = {
             "seq_obs": [],
@@ -41,18 +43,22 @@ class RewardPredictor:
         seq_obs = seq_obs.to(self.device)
         seq_action = seq_action.to(self.device)
 
+        [model.eval() for model in self.predictors]
         # normalize
         with th.no_grad():
-            preds = th.stack([p.forward(seq_obs, seq_action) for p in self.predictors])
-            norm_preds = th.norm(preds)
-            pred_reward = th.mean(norm_preds)
-        
+                preds = th.stack([p.forward(seq_obs, seq_action) for p in self.predictors]).squeeze(-1)
+                # std, mean = th.std_mean(preds)
+                # n_pred = (preds-mean) / std
+                norm_preds = th.norm(preds, p=2, dim=-1)
+                pred_reward = th.mean(norm_preds)
+            
         # todo : val loss: (1.1, 1.5) of train loss
         # todo : 10% human error
 
         return pred_reward
     
     def train(self) -> float:
+        [model.train() for model in self.predictors]
         D = []
         for d in self.D:
             D.append(d) ##### optimizer later
@@ -108,18 +114,12 @@ class RewardPredictor:
             true_rewards = self.temp_experience['true_reward'][segments[0]], self.temp_experience['true_reward'][segments[1]]
 
             for i, observations in enumerate(seq_obs):
-                print(f"segment {i+1}:")
                 save_video(np.array(observations.numpy()*255,dtype=np.uint8), i)
-                print("\n")
-
-            acceptable_feedbacks = ['1', '2', 'e', 'n']
-            while True:
-                human_feedback = input("Which segment do you prefer? (1: (1better), 2:(2better), e:(equal good) or n(incomparable))")
-                if human_feedback in acceptable_feedbacks:
-                    break
-                print("invalid answer. Try again.", end=" ")
+            
+            human_feedback = interface_pick()
             
             segments = (seq_obs[0], seq_actions[0]), (seq_obs[1],seq_actions[1])
+
             if human_feedback == '1':
                 self.add_feedback(seg1=segments[0], seg2=segments[1], mu=(1.0,.0))
                 
