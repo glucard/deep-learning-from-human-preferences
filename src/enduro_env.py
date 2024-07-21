@@ -9,8 +9,8 @@ from .reward_predictor import RewardPredictor
 from collections import deque
 
 def preprocess_obs(frame):
-    img = Image.fromarray(frame).resize((80,80))
-    return np.asarray(img, dtype=np.uint8)[None]
+    img = Image.fromarray(frame).resize((80,80)) 
+    return np.asarray(img, dtype=np.float32)[None] / 255.0
 
 class EnvWrapper(gymnasium.Wrapper):
     def __init__(self, env:gymnasium.Env, reward_predictor:RewardPredictor, seq_len:int=5):
@@ -18,7 +18,7 @@ class EnvWrapper(gymnasium.Wrapper):
         super(EnvWrapper, self).__init__(env)
         self.seq_len = seq_len
         self.reward_predictor = reward_predictor
-        self.observation_space = spaces.Box(low=0.0, high=1.0, shape=(1, 80, 80), dtype=np.uint8)
+        self.observation_space = spaces.Box(low=0.0, high=1.0, shape=(1, 80, 80), dtype=np.float32)
 
     def reset(self, **kwargs):
         self.seq_actions = np.zeros((self.seq_len, self.action_space.n), dtype=np.float32)
