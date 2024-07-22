@@ -15,7 +15,7 @@ class TrainRewardPredictorCallback(BaseCallback):
         k = k if k > 1 else 2
         self.rp.get_human_feedback(k)
         if len(self.rp.D) > 1:
-            for i in range(100):
+            for i in range(10):
                 loss = self.rp.train()
                 print(f"Reward Predict loss = {loss}\n")
         self.rp.reset_temp_experience()
