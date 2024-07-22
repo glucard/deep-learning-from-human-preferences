@@ -54,5 +54,5 @@ def main():
     model.save('model')
 
 if __name__ == "__main__":
-    # main()
+    main()
     load_run()
