@@ -7,6 +7,7 @@ import numpy as np
 import cv2
 import tkinter as tk
 from .human_feedback_interface import interface_pick
+from .utils import RunningStat
 
 def save_video(frames, i):
     # Define the codec and create a VideoWriter object
@@ -37,6 +38,7 @@ class RewardPredictor:
             "seq_actions": [],
             "true_reward": [],
         }
+        self.r_norm = RunningStat(shape=n_predictors)
     
     def predict(self, seq_obs:th.Tensor, seq_action:th.Tensor) -> th.Tensor:
         # tensors to device
@@ -46,16 +48,26 @@ class RewardPredictor:
         [model.eval() for model in self.predictors]
         # normalize
         with th.no_grad():
-                preds = th.stack([p.forward(seq_obs, seq_action) for p in self.predictors]).squeeze(-1)
-                # std, mean = th.std_mean(preds)
-                # n_pred = (preds-mean) / std
-                norm_preds = th.norm(preds, p=2, dim=-1)
-                pred_reward = th.mean(norm_preds)
+            preds = th.stack([p.forward(seq_obs.unsqueeze(0), seq_action.unsqueeze(0)) for p in self.predictors]).view(self.n_predictors, -1).cpu()
+            # std, mean = th.std_mean(preds)
+            # n_pred = (preds-mean) / std
+            preds = preds.transpose(0,1)
+            for p in preds:
+                self.r_norm.push(p)
+            preds -= self.r_norm.mean
+            preds -= self.r_norm.mean
+            preds /= (self.r_norm.std + 1e-12)
+            preds *= 0.05
+            # norm_preds = th.norm(preds, p=2, dim=-1) * 0.05
+            # pred_reward = th.mean(norm_preds)
+            preds = preds.transpose(0,1)
+            pred_reward = th.mean(preds, dim=0)
             
         # todo : val loss: (1.1, 1.5) of train loss
         # todo : 10% human error
 
-        return pred_reward
+
+        return pred_reward[-1]
     
     def train(self) -> float:
         [model.train() for model in self.predictors]
@@ -68,7 +80,8 @@ class RewardPredictor:
         run_loss = 0
         for p in self.predictors:
             sampled_D = sample(D, k)
-            run_loss += p.train_rp(sampled_D)
+            # run_loss += p.train_rp(sampled_D)
+            run_loss += p.train_rp(D)
 
         return run_loss / self.n_predictors
 
