@@ -13,7 +13,7 @@ def preprocess_obs(frame):
     return np.asarray(img, dtype=np.float32)[None] / 255.0
 
 class EnvWrapper(gymnasium.Wrapper):
-    def __init__(self, env:gymnasium.Env, reward_predictor:RewardPredictor, seq_len:int=5):
+    def __init__(self, env:gymnasium.Env, reward_predictor:RewardPredictor=None, seq_len:int=5):
 
         super(EnvWrapper, self).__init__(env)
         self.seq_len = seq_len
@@ -50,11 +50,15 @@ class EnvWrapper(gymnasium.Wrapper):
         seq_actions = th.tensor(self.seq_actions, dtype=th.float32)
 
         # reward_t
-        predicted_reward = self.reward_predictor.predict(seq_obs, seq_actions)
+        
+        if self.reward_predictor:
+            reward = self.reward_predictor.predict(seq_obs, seq_actions)
+            self.reward_predictor.add_temp_experience(seq_obs, seq_actions, _reward)
+        else:
+            reward = _reward
 
-        self.reward_predictor.add_temp_experience(seq_obs, seq_actions, _reward)
         
         # obs_t+1
         self.seq_obs[:-1] = self.seq_obs[1:]
         self.seq_obs[-1] = obs
-        return obs, predicted_reward, done, truncated, info
+        return obs, reward, done, truncated, info
