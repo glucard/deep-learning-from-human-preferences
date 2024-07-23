@@ -1,2 +1,4 @@
 *.avi
+*.zip
+events.out.tfevents.*
 __pycache__
