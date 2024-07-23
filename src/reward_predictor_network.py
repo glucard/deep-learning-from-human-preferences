@@ -3,7 +3,7 @@ from torch import nn
 import torch.nn.functional as F
 
 class RewardPredictorNetwork(nn.Module):
-    def __init__(self, observation_shape:tuple, n_action:int, device:str, features_dim:int=256, learning_rate:float=1e-4, weight_decay:float=0.01, dropout:float=0.1) -> None:
+    def __init__(self, observation_shape:tuple, n_action:int, device:str, features_dim:int=256, learning_rate:float=5e-4, weight_decay:float=0.01, dropout:float=0.1) -> None:
 
         """
         observation_shape:
@@ -23,16 +23,16 @@ class RewardPredictorNetwork(nn.Module):
         self.cnn = nn.Sequential(
             nn.Conv2d(in_channels, 16, kernel_size=(8,8), stride=(4,4)),
             nn.BatchNorm2d(16),
-            # nn.Dropout(dropout),
-            nn.LeakyReLU(),
+            nn.Dropout(dropout),
+            nn.ReLU(),
             nn.Conv2d(16, 32, kernel_size=(4,4), stride=(2,2)),
             nn.BatchNorm2d(32),
-            # nn.Dropout(dropout),
-            nn.LeakyReLU(),
-            # nn.Conv2d(32, 64, kernel_size=(3,3), stride=(1,1)),
-            # nn.BatchNorm2d(64),
-            # nn.Dropout(dropout),
-            # nn.LeakyReLU(),
+            nn.Dropout(dropout),
+            nn.ReLU(),
+            nn.Conv2d(32, 64, kernel_size=(3,3), stride=(1,1)),
+            nn.BatchNorm2d(64),
+            nn.Dropout(dropout),
+            nn.ReLU(),
             nn.Flatten()
         )
 
@@ -44,10 +44,10 @@ class RewardPredictorNetwork(nn.Module):
         # self.linear = nn.Sequential(
         #     nn.Linear(n_flatten, features_dim),
         #     nn.Dropout(dropout),
-        #     nn.LeakyReLU(),
+        #     nn.ReLU(),
         # )
-        self.lstm = nn.LSTM(n_flatten, features_dim, num_layers=1)# , dropout=dropout) # + 1 for action
-        self.lstm_relu = nn.LeakyReLU()
+        self.lstm = nn.LSTM(n_flatten, features_dim, num_layers=2, dropout=dropout)# , dropout=dropout) # + 1 for action
+        self.lstm_relu = nn.ReLU()
         self.output = nn.Sequential(
             nn.Linear(features_dim + n_action, 1),
         )

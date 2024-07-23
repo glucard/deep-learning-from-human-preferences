@@ -6,7 +6,7 @@
 
 ### Example of human feedback
 
-&nbsp;&nbsp;Chooses preferable segments or tell if they are incomparable.
+&nbsp;&nbsp;Chooses preferable segment or tell if they are incomparable.
 ![gif](media/HumanFeedbackInterface.gif)
 
 ### Benchmark

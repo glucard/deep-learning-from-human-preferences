@@ -45,7 +45,7 @@ def rp_train(model_name):
                          n_steps=512,
                          batch_size=64,
                          verbose=2,
-                         learning_rate=2e-5, tensorboard_log="reward_pred_runs/")
+                         learning_rate=2e-5, tensorboard_log="reward_pred_runs/rlfhp")
     #print(model.policy)
 
     callback = TrainRewardPredictorCallback(reward_model)
@@ -71,12 +71,13 @@ def normal_train(model_name):
                          n_steps=512,
                          batch_size=64,
                          verbose=2,
-                         learning_rate=2e-5)
+                         learning_rate=2e-5, tensorboard_log="reward_pred_runs/normal_train/")
     #print(model.policy)
 
     
+    callback = TrainRewardPredictorCallback(rp=None)
     try:
-        model.learn(10_000)
+        model.learn(10_000, callback=callback)
     except KeyboardInterrupt as e:
         print(e)
 
@@ -85,7 +86,7 @@ def normal_train(model_name):
 def main():
     rp_train("model")
     normal_train("normal_model")
-    load_run()
+    load_run("model")
     
 
 if __name__ == "__main__":
