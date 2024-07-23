@@ -13,9 +13,8 @@ import gymnasium
 def get_device():
     return "cuda" if th.cuda.is_available() else "cpu"
 
-def load_run():
-
-    model = RecurrentPPO.load('model.zip')
+def load_run(model_name):
+    model = RecurrentPPO.load(f'{model_name}.zip')
     env = gymnasium.make("ALE/Enduro-v5", obs_type="grayscale", render_mode="human", full_action_space=True)
     env = EnvWrapper(env=env, reward_predictor=None, seq_len=30)
     obs, _ = env.reset()
@@ -25,13 +24,13 @@ def load_run():
     # Episode start signals are used to reset the lstm states
     episode_starts = np.ones((num_envs,), dtype=bool)
     while True:
-        action, lstm_states = model.predict(obs, state=lstm_states, episode_start=episode_starts)#, deterministic=True)
+        action, lstm_states = model.predict(obs, state=lstm_states, episode_start=episode_starts) #, deterministic=True)
         obs, rewards, dones, truncated, info = env.step(action)
         episode_starts = dones
         env.render()
-def main():
-    
-    env = gymnasium.make("ALE/Enduro-v5", obs_type="grayscale", render_mode="human", full_action_space=True)
+
+def rp_train(model_name):
+    env = gymnasium.make("ALE/Enduro-v5", obs_type="grayscale", full_action_space=True)
     device = get_device()
     reward_model = RewardPredictor((1,80,80), 5, n_action=env.action_space.n, device=device)
     
@@ -46,13 +45,48 @@ def main():
                          n_steps=512,
                          batch_size=64,
                          verbose=2,
-                         learning_rate=1e-4)
+                         learning_rate=2e-5, tensorboard_log="reward_pred_runs/")
     #print(model.policy)
 
     callback = TrainRewardPredictorCallback(reward_model)
-    model.learn(10_000, callback=callback)
-    model.save('model')
+    
+    try:
+        model.learn(10_000, callback=callback)
+    except KeyboardInterrupt as e:
+        print(e)
+
+    model.save(model_name)
+
+def normal_train(model_name):
+    env = gymnasium.make("ALE/Enduro-v5", obs_type="grayscale", full_action_space=True)
+    
+    env = EnvWrapper(env=env, reward_predictor=None, seq_len=30)
+
+    # Define the custom policy with normalized_images set to False
+    policy_kwargs = dict(
+        normalize_images=False
+    )
+
+    model = RecurrentPPO(CnnLstmPolicy, env, policy_kwargs=policy_kwargs,
+                         n_steps=512,
+                         batch_size=64,
+                         verbose=2,
+                         learning_rate=2e-5)
+    #print(model.policy)
+
+    
+    try:
+        model.learn(10_000)
+    except KeyboardInterrupt as e:
+        print(e)
+
+    model.save(model_name)
+
+def main():
+    rp_train("model")
+    normal_train("normal_model")
+    load_run()
+    
 
 if __name__ == "__main__":
     main()
-    load_run()

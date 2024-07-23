@@ -33,7 +33,6 @@ class EnvWrapper(gymnasium.Wrapper):
 
     def step(self, action):
         obs, _reward, done, truncated, info = self.env.step(action)
-        
         # pre process obs
         obs = preprocess_obs(obs)
         
@@ -54,9 +53,10 @@ class EnvWrapper(gymnasium.Wrapper):
         if self.reward_predictor:
             reward = self.reward_predictor.predict(seq_obs, seq_actions)
             self.reward_predictor.add_temp_experience(seq_obs, seq_actions, _reward)
+            info['pred_reward'] = reward.item()
         else:
             reward = _reward
-
+        info['true_reward'] = _reward
         
         # obs_t+1
         self.seq_obs[:-1] = self.seq_obs[1:]
