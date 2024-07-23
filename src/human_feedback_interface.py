@@ -77,7 +77,6 @@ class VideoPicker:
             self.thread2.start()
 
     def play_video(self, video_path, frame_queue):
-        print(f"Playing video: {video_path}")
         cap = cv2.VideoCapture(video_path)
         fps = cap.get(cv2.CAP_PROP_FPS)
         delay = 1 / fps  # Delay to match the video FPS
@@ -91,7 +90,6 @@ class VideoPicker:
             frame_queue.put(frame)
             time.sleep(delay)  # Add delay to control frame rate
         cap.release()
-        print(f"Stopped playing video: {video_path}")
 
     def update_frame(self):
         if not self.queue1.empty():
@@ -127,13 +125,9 @@ class VideoPicker:
 
         self.stop_event.set()
         if self.thread2 and self.thread2.is_alive():
-            print("closing2")
             self.thread2.join()
-            print("closed2")
         if self.thread1 and self.thread1.is_alive():
-            print("closing1")
             self.thread1.join()
-            print("closed1")
         # self.stop_event.clear()
         # self.master.destroy()
 
