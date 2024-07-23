@@ -7,12 +7,11 @@
 ### Example of human feedback
 
 &nbsp;&nbsp;Chooses between frames or tell if they are incomparable.
-<video controls src="media/HumanFeedback Interface.mp4" title="Title"></video>
+![gif](media/HumanFeedbackInterface.gif)
 
 ### Benchmark
 
 todo
-
 
 ## References
 - Christiano, P. F., Leike, J., Brown, T. B., Martic, M., Legg, S., & Amodei, D. (2017). Deep reinforcement learning from human preferences. In Advances in Neural Information Processing Systems (pp. 4299-4307).
