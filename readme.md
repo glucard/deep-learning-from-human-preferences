@@ -11,7 +11,8 @@
 
 ### Benchmark
 
-todo
+Accumulative rewards timeline on Enduro.
+![benchmark](media/benchmark.png)
 
 ## References
 - Christiano, P. F., Leike, J., Brown, T. B., Martic, M., Legg, S., & Amodei, D. (2017). Deep reinforcement learning from human preferences. In Advances in Neural Information Processing Systems (pp. 4299-4307).
