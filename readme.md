@@ -70,7 +70,7 @@ and the design decisions that went into the software" (Brockman et al., 2016).
 </div>
 
 <p align="justify">
-&nbsp;&nbsp;&nbsp;&nbsp;To simplify the observation to the CNN model and improve a faster learning, the observation is preprocessed to grayscale, resized to (80,80) and normalized between range [0,1] by dividing the pixels by 255.
+&nbsp;&nbsp;&nbsp;&nbsp;To simplify the observation to the CNN model and improve a faster learning, the observation is preprocessed to grayscale, resized to (80,80) and normalized between range [0,1] by dividing each pixel by 255.
 </p>
 
 <div align="center">
