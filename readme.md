@@ -40,7 +40,7 @@
 
 <div align="center">
     <img src="media/D_size_during_train.png">
-    <div style="font-size:0.8em;">
+    <div style="font-size:10px;">
         Gathered human feedbacks count during train.
     </div>
 </div>
