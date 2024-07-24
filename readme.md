@@ -62,11 +62,35 @@ and the design decisions that went into the software" (Brockman et al., 2016).
 &nbsp;&nbsp;&nbsp;&nbsp;An agent can interact with env from Gymnasium API, gathering a observation, from that observation the agents takes an action and, from that action, receives a reward and a new observation.
 </p>
 
-todo ...
+<div align="center">
+    <img src="media/raw_observation.png">
+    <div style="font-size:10px;">
+        Observation gathered from Enduro Env.
+    </div>
+</div>
 
-...
+<p align="justify">
+&nbsp;&nbsp;&nbsp;&nbsp;To simplify the observation to the CNN model and improve a faster learning, the observation is preprocessed to grayscale, resized to (80,80) normalized between range [0,1] by dividing the pixels by 255.
+</p>
+
+<div align="center">
+    <img src="media/preprocessed_observation.png">
+    <div style="font-size:10px;">
+        Rescaled grayscale observation.
+    </div>
+</div>
+
+<p align="justify">
+&nbsp;&nbsp;&nbsp;&nbsp;These observation are feed to an agent that will be trained using Reinforcement Learning, using rewards as feedbacks on how good they actions were. The model has a LSTM layer and is feed with sequences of observations.
+</p>
 
 #### Rewards
+
+<p align="justify">
+&nbsp;&nbsp;&nbsp;&nbsp;The Gymnasium API already provides rewards for each step an agent takes on it envs, but we will modify it to use our Reward Model that predicts rewards for each timestep. This model will be feed with the same observation that our agent receives, and the action taken by the agent on that same observation will be feed together into the Reward Model. Our agent are trained using the rewards gather from the Reward Model.
+</p>
+
+#### Training the Reward Model
 
 todo ...
 

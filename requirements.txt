@@ -1,2 +1,3 @@
 torch
 gymnasium
+sb3-contrib
