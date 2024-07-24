@@ -2,17 +2,67 @@
 
 ## About
 
-&nbsp;&nbsp;The paper "Deep Learning from Human Preferences" by Christiano et al. (2017) explores the concept of training machine learning models using human feedback to achieve more aligned and desirable outcomes. The authors introduce a framework where deep reinforcement learning models are trained not just on predefined reward signals, but also on human evaluations of the model's performance. This approach allows the model to learn complex behaviors that are more closely aligned with human values and preferences, leading to more nuanced and effective decision-making in various tasks.
+&nbsp;&nbsp;&nbsp;&nbsp;The paper "Deep Learning from Human Preferences" by Christiano et al. (2017) explores the concept of training machine learning models using human feedback to achieve more aligned and desirable outcomes. The authors introduce a framework where deep reinforcement learning models are trained not just on predefined reward signals, but also on human evaluations of the model's performance. This approach allows the model to learn complex behaviors that are more closely aligned with human values and preferences, leading to more nuanced and effective decision-making in various tasks.
 
 ### Example of human feedback
 
-&nbsp;&nbsp;Chooses preferable segment or tell if they are incomparable.
-![gif](media/HumanFeedbackInterface.gif)
+&nbsp;&nbsp;&nbsp;&nbsp;Select preferable segment or tell if they are incomparable.
+
+<div align="center">
+    <img src="media/HumanFeedbackInterface.gif">
+    <div style="font-size:0.85em;">
+        Human feedback interface.
+    </div>
+</div>
 
 ### Benchmark
 
-Accumulative rewards timeline on Enduro.
-![benchmark](media/benchmark.png)
+&nbsp;&nbsp;&nbsp;&nbsp;To validate the implementation a benchmark was made. The following results are using a gymnasium env on Enduro game from Atari.
+
+<div align="center">
+    <img src="media/benchmark.png">
+    <div style="font-size:0.85em;">
+        Accumulative rewards gather during train on Enduro from Atari.
+    </div>
+</div>
+
+&nbsp;&nbsp;&nbsp;&nbsp;The model can be improved by optimizing the hparams and collecting more human feedbacks. Note that, given that humans has to give theirs feedbacks to the machine, the training process is consederably slow in terms of time.
+
+&nbsp;&nbsp;&nbsp;&nbsp;During the training process, only 290 feedbacks (preference between segments) where given. On original papers, they collected 5.5k feedbacks.
+
+<div align="center">
+    <img src="media/D_size_during_train.png">
+    <div style="font-size:0.85em;">
+        Gathered human feedbacks count during train.
+    </div>
+</div>
+
+### How it works
+
+In the following will be presented the steps of training process:
+
+#### Frame gather from Gymnasium API
+
+&nbsp;&nbsp;&nbsp;&nbsp;On the current DLFHP implementation was used Gymnasium, which is a fork of OpenAI’s Gym library. "OpenAI Gym is a toolkit for reinforcement learning research. It includes a growing collection of benchmark problems that expose a common interface, and a website where people can share their results
+and compare the performance of algorithms. This whitepaper discusses the components of OpenAI Gym
+and the design decisions that went into the software" (Brockman et al., 2016).
+
+&nbsp;&nbsp;&nbsp;&nbsp;An agent can interact with env from Gymnasium API, gathering a observation, from that observation the agents takes an action and, from that action, receives a reward and a new observation.
+
+todo ...
+
+...
+
+#### Rewards
+
+todo ...
+
+#### todo ...
+
+todo ...
+
+...
 
 ## References
 - Christiano, P. F., Leike, J., Brown, T. B., Martic, M., Legg, S., & Amodei, D. (2017). Deep reinforcement learning from human preferences. In Advances in Neural Information Processing Systems (pp. 4299-4307).
+- Brockman, G., Cheung, V., Pettersson, L., Schneider, J., Schulman, J., Tang, J., & Zaremba, W. (2016). OpenAI Gym. arXiv preprint arXiv:1606.01540. Retrieved from https://arxiv.org/abs/1606.01540
