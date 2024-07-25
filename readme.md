@@ -1,5 +1,17 @@
 # deep-learning-from-human-preferences
 
+- [deep-learning-from-human-preferences](#deep-learning-from-human-preferences)
+  - [About](#about)
+    - [Example of human feedback](#example-of-human-feedback)
+    - [Benchmark](#benchmark)
+    - [How it works](#how-it-works)
+      - [Frame gather from Gymnasium API](#frame-gather-from-gymnasium-api)
+      - [Rewards](#rewards)
+      - [Reward Model](#reward-model)
+      - [todo ...](#todo)
+  - [References](#references)
+
+
 ## About
 
 <p align="justify">
@@ -59,7 +71,9 @@ and the design decisions that went into the software" (Brockman et al., 2016).
 </p>
 
 <p align="justify">
-&nbsp;&nbsp;&nbsp;&nbsp;An agent can interact with env from Gymnasium API, gathering a observation, from that observation the agents takes an action and, from that action, receives a reward and a new observation.
+
+&nbsp;&nbsp;&nbsp;&nbsp;An agent, policy $\pi$, can interact with env from Gymnasium API, gathering a observation, from that observation the agents takes an action and, from that action, receives a reward and a new observation.
+
 </p>
 
 <div align="center">
@@ -81,25 +95,44 @@ and the design decisions that went into the software" (Brockman et al., 2016).
 </div>
 
 <p align="justify">
-&nbsp;&nbsp;&nbsp;&nbsp;These observation are feed to an agent that will be trained using Reinforcement Learning, using rewards as feedbacks on how good they actions were. The model has a LSTM layer and is feed with sequences of observations.
+
+&nbsp;&nbsp;&nbsp;&nbsp;These observation are feed to an policy $\pi$ that will be trained using Reinforcement Learning, using rewards as feedbacks on how good they actions were. The policy $\pi$ are feed with sequences of $n$ observations.
+
 </p>
 
 #### Rewards
 
 <p align="justify">
-&nbsp;&nbsp;&nbsp;&nbsp;The Gymnasium API already provides rewards for each step an agent takes on it envs, but we will modify it to use our Reward Model that predicts rewards for each timestep. This model will be feed with the same observation that our agent receives, and the action taken by the agent on that same observation will be feed together into the Reward Model. Our agent are trained using the rewards gather from the Reward Model.
+
+&nbsp;&nbsp;&nbsp;&nbsp;The Gymnasium API already provides rewards for each step an policy $\pi$ takes on it envs, but we will modify it to use our Reward Model that predicts rewards for each timestep. This model will be feed with the same observation that our policy $\pi:o \rightarrow a$ receives, and the action $a$ taken by the $\pi$ on that same observation will be feed together into the Reward Model. The policy $\pi$ are trained using the rewards gather from the Reward Model.
+
 </p>
 
-#### Training the Reward Model
+<p align="justify">
+&nbsp;&nbsp;&nbsp;&nbsp;The rewards given by the Gymnasium API gonna be used to compare two agents: one trained using the the Reward Model an another trained using the true rewards (rewards from Gymnasium API). While training the model trained using feedbacks will never use the true rewards.
+</p>
 
-todo ...
+#### Reward Model
 
-#### todo ...
+<div style="text-align: justify;">
 
-todo ...
+&nbsp;&nbsp;&nbsp;&nbsp;Using feedbacks from human to train an policy $\pi$ was a complex task that could not help to solve many complex environments. The paper "Deep Learning from Human Preferences" by Christiano et al. (2017) aims to solve that problem. "We show that this approach can effectively solve complex RL tasks without access to the reward function, including Atari games and simulated robot locomotion, while providing feedback on less than 1% of our agent’s interactions with the environment"(Christiano et al., 2017).
 
-...
+&nbsp;&nbsp;&nbsp;&nbsp;To predict the rewards the model must have a observation $o_t$ and a action $a_t$ that the policy $\pi$ takes on $o_t$, so reward $r_t=\hat{r}(o_t, a_t)$.
+
+&nbsp;&nbsp;&nbsp;&nbsp;Adjusting reward function $\hat{r}$ can be done using human preferences. The preferences are made based on segments $\sigma = ((o_0, a_0), (o_1, a_1), ..., (o_{k-1}, a_{k-1}))$. The humans must select a segment they prefer over another segment $\sigma^1 \succ \sigma^2$ or tell if they are incomparable. Preferences of segments $\sigma$ are stored on a tuple $D$ as tuple $(\sigma^1, \sigma^2, \mu)$, the $\mu$ is a distribution of segments $\sigma$ preference. A crossentropy loss can train the model predicting the probabilities $\hat{P}[\sigma^1 \succ \sigma^2]$ and  $\mu$ as labels.
+
+</div>
+
+#### Training policy $\pi$
+
+<div style="text-align: justify;">
+
+&nbsp;&nbsp;&nbsp;&nbsp;Using the preprocessed observation $o_t$ the policy $\pi$ takes an action $a_t$ receiving an $\hat{r}_t$ and a new observation $o$ for $k$ timesteps, these experiences are stored on a tuple $T=(\sigma^{0},\sigma^{1},..., \sigma^{k-1})$. After $k$ timesteps the policy $\pi$ is updated using PPO method (Schulman et al, 2017) on predicted reward $r$ from Reward Model $\hat{r}$. Then humans select they preferences between random sampled segment $\sigma$ from tuple $T$ and store the preferences  $\sigma^1 \succ \sigma^2$ on tuple $D$ so that the Reward Model $\hat{r}$ can be updated. After this process, the loop continues until timesteps $k=30.000$.
+
+</div>
 
 ## References
 - Christiano, P. F., Leike, J., Brown, T. B., Martic, M., Legg, S., & Amodei, D. (2017). Deep reinforcement learning from human preferences. In Advances in Neural Information Processing Systems (pp. 4299-4307).
 - Brockman, G., Cheung, V., Pettersson, L., Schneider, J., Schulman, J., Tang, J., & Zaremba, W. (2016). OpenAI Gym. arXiv preprint arXiv:1606.01540. Retrieved from https://arxiv.org/abs/1606.01540
+- Schulman, John, et al. "Proximal Policy Optimization Algorithms." arXiv preprint arXiv:1707.06347 (2017). https://arxiv.org/abs/1707.06347
