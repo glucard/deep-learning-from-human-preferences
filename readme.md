@@ -63,7 +63,7 @@
 ### How it works
 
 <p align="justify">
-In the following will be presented the steps of training process:
+&nbsp;&nbsp;&nbsp;&nbsp;In the following will be presented the steps of training process:
 </p>
 
 #### Frame gather from Gymnasium API
@@ -117,7 +117,7 @@ and the design decisions that went into the software" (Brockman et al., 2016).
 
 #### Reward Model
 
-<div style="text-align: justify;">
+<p align="justify">
 
 &nbsp;&nbsp;&nbsp;&nbsp;Using feedbacks from human to train an policy $\pi$ was a complex task that could not help to solve many complex environments. The paper "Deep Learning from Human Preferences" by Christiano et al. (2017) aims to solve that problem. "We show that this approach can effectively solve complex RL tasks without access to the reward function, including Atari games and simulated robot locomotion, while providing feedback on less than 1% of our agent’s interactions with the environment"(Christiano et al., 2017).
 
@@ -125,15 +125,15 @@ and the design decisions that went into the software" (Brockman et al., 2016).
 
 &nbsp;&nbsp;&nbsp;&nbsp;Adjusting reward function $\hat{r}$ can be done using human preferences. The preferences are made based on segments $\sigma = ((o_0, a_0), (o_1, a_1), ..., (o_{k-1}, a_{k-1}))$. The humans must select a segment they prefer over another segment $\sigma^1 \succ \sigma^2$ or tell if they are incomparable. Preferences of segments $\sigma$ are stored on a tuple $D$ as tuple $(\sigma^1, \sigma^2, \mu)$, the $\mu$ is a distribution of segments $\sigma$ preference. A crossentropy loss can train the model predicting the probabilities $\hat{P}[\sigma^1 \succ \sigma^2]$ and  $\mu$ as labels.
 
-</div>
+</p>
 
 #### Training policy $\pi$
 
-<div style="text-align: justify;">
+<p align="justify">
 
 &nbsp;&nbsp;&nbsp;&nbsp;Using the preprocessed observation $o_t$ the policy $\pi$ takes an action $a_t$ receiving an $\hat{r}_t$ and a new observation $o$ for $k$ timesteps, these experiences are stored on a tuple $T=(\sigma^{0},\sigma^{1},..., \sigma^{k-1})$. After $k$ timesteps the policy $\pi$ is updated using PPO method (Schulman et al, 2017) on predicted reward $r$ from Reward Model $\hat{r}$. Then humans select they preferences between random sampled segment $\sigma$ from tuple $T$ and store the preferences  $\sigma^1 \succ \sigma^2$ on tuple $D$ so that the Reward Model $\hat{r}$ can be updated. After this process, the loop continues until timesteps $k=30.000$.
 
-</div>
+</p>
 
 ## References
 - Christiano, P. F., Leike, J., Brown, T. B., Martic, M., Legg, S., & Amodei, D. (2017). Deep reinforcement learning from human preferences. In Advances in Neural Information Processing Systems (pp. 4299-4307).
