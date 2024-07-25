@@ -1,18 +1,21 @@
 # deep-learning-from-human-preferences
 
+## Summary
+
 - [deep-learning-from-human-preferences](#deep-learning-from-human-preferences)
-  - [About](#about)
+  - [Summary](#summary)
+  - [Project](#project)
     - [Example of human feedback](#example-of-human-feedback)
     - [Benchmark](#benchmark)
     - [How it works](#how-it-works)
       - [Frame gather from Gymnasium API](#frame-gather-from-gymnasium-api)
       - [Rewards](#rewards)
       - [Reward Model](#reward-model)
-      - [todo ...](#todo)
+      - [Training policy $\pi$](#training-policy-pi)
   - [References](#references)
 
 
-## About
+## Project
 
 <p align="justify">
 &nbsp;&nbsp;&nbsp;&nbsp;The paper "Deep Learning from Human Preferences" by Christiano et al. (2017) explores the concept of training machine learning models using human feedback to achieve more aligned and desirable outcomes. The authors introduce a framework where deep reinforcement learning models are trained not just on predefined reward signals, but also on human evaluations of the model's performance. This approach allows the model to learn complex behaviors that are more closely aligned with human values and preferences, leading to more nuanced and effective decision-making in various tasks.
